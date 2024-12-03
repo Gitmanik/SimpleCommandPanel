@@ -21,7 +21,8 @@ for server in config['servers']:
     if server[2] != None:
         client.connect(server[0], username=server[1], password=server[2])
     else:
-        client.connect(server[0], username=server[1])
+        private_key = paramiko.RSAKey.from_private_key_file('keys/' + server[3])
+        client.connect(server[0], username=server[1], pkey=private_key)
 
     shells.append([f'{server[1]}@{server[0]}', client])
 
