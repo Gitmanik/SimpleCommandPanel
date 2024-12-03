@@ -19,9 +19,11 @@ for server in config['servers']:
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     if server[2] != None:
+        print(f"Connecting to {server[0]} as {server[1]} using password {'*' * len(server[2])}")
         client.connect(server[0], username=server[1], password=server[2])
     else:
-        private_key = paramiko.RSAKey.from_private_key_file('keys/' + server[3])
+        print(f"Connecting to {server[0]} as {server[1]} using private key {server[3]}")
+        private_key = paramiko.RSAKey.from_private_key_file('./keys/' + server[3])
         client.connect(server[0], username=server[1], pkey=private_key)
 
     shells.append([f'{server[1]}@{server[0]}', client])
