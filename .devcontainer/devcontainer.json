@@ -1,0 +1,14 @@
+{
+	"name": "Local Dockerfile",
+	"build": {
+		"context": "..",
+		"dockerfile": "../Dockerfile",
+		"args": {
+			"network": "host"
+		}
+	},
+	"mounts": [
+		"source=/var/run/dbus,target=/var/run/dbus,type=bind",
+		"source=/var/run/avahi-daemon/socket,target=/var/run/avahi-daemon/socket,type=bind"
+	]
+}
