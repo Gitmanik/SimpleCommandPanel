@@ -4,6 +4,7 @@ import paramiko
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+from datetime import datetime
 
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
@@ -57,6 +58,7 @@ def update_data():
 
     try:
         tasks_data = api.get_tasks(project_id=todoist_project.id)
+        tasks_data.sort(key= lambda x: datetime.strptime(x.due.date, "%Y-%m-%d"))       
     except Exception as e:
         print(f"Error while retrieving Todoist tasks")
         print(e)
