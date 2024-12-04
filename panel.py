@@ -41,6 +41,14 @@ def disconnect_clients():
             print(f"Disconnecting from {client[0]}")
             client[1].close()
 
+def client_is_alive(client):
+    try:
+        transport = client.get_transport()
+        transport.send_ignore()
+        return True
+    except Exception as e:
+        return False
+
 server_data = dict()
 tasks_data = []
 def update_data():
@@ -61,9 +69,9 @@ def update_data():
         disk = "df -h /"
         docker = 'docker ps -a --format "table <b>{{.Names}}</b> {{.Status}}"'
 
-        if shell[1] is None:
+        if shell[1] is None or not client_is_alive(shell[1]):
             shells[idx] = connect_client(config['servers'][idx]) # smells so bad
-        
+
         client = shells[idx][1]
 
         cpu_data = '-'
