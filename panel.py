@@ -91,7 +91,6 @@ def get_tasks_table():
 
     return table
 
-
 @app.route("/")
 def hello_world():
-    return render_template('index.html', tasks_table = get_tasks_table(), data_table = get_data_table())
+    return render_template('index.html', tasks_table = get_tasks_table(), data_table = get_data_table(), refresh_timer = config['refresh_timer'])
