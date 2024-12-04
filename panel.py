@@ -34,6 +34,13 @@ shells = []
 for server in config['servers']:
     shells.append(connect_client(server))
 
+def disconnect_clients():
+    print(f"Disconnecting clients")
+    for client in shells:
+        if client[1] is not None:
+            print(f"Disconnecting from {client[0]}")
+            client[1].close()
+
 server_data = dict()
 def update_data():
     print(f"Updating server data")
@@ -77,6 +84,7 @@ data_update_scheduler.add_job(func=update_data, trigger="interval", seconds=conf
 update_data()
 data_update_scheduler.start()
 atexit.register(lambda: data_update_scheduler.shutdown())
+atexit.register(disconnect_clients)
 
 def get_data_table():
     table = '<div>'
