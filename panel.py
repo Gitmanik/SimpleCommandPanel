@@ -2,11 +2,11 @@ from todoist_api_python.api import TodoistAPI
 from flask import Flask, render_template
 import paramiko
 import json
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
-
-app = Flask(__name__)
 
 api = TodoistAPI(config["todoist_api_key"])
 todoist_project = next((x for x in  api.get_projects() if x.name == config['todoist_project_name']), None)
@@ -34,9 +34,9 @@ shells = []
 for server in config['servers']:
     shells.append(connect_client(server))
 
-def get_data_table():
-    table = '<div>'
-
+server_data = dict()
+def update_data():
+    print(f"Updating server data")
     for idx, shell in enumerate(shells):
         host = shell[0]
 
@@ -70,10 +70,24 @@ def get_data_table():
         else:
             print(f"Can't get data from unconnected server: {host}, skipping")
 
+        server_data[host] = [cpu_data, disk_data, docker_data]
+
+data_update_scheduler = BackgroundScheduler()
+data_update_scheduler.add_job(func=update_data, trigger="interval", seconds=config['data_update_timer'])
+update_data()
+data_update_scheduler.start()
+atexit.register(lambda: data_update_scheduler.shutdown())
+
+def get_data_table():
+    table = '<div>'
+
+    for host, data in server_data.items():
+        cpu_data = data[0]
+        disk_data = data[1]
+        docker_data = data[2]
 
         table += f"<h3 style='text-align: center; margin-bottom:0'>{host}</h3>"
         table += f"<p style='width:100%;text-align:center; display: inline-block; margin:0; font-size: small; font-weight: bold'>{disk_data}{cpu_data}</p><p style='font-size: smaller; margin:0'>{docker_data}</p>"
-
 
     table += '</div>'
 
@@ -91,6 +105,7 @@ def get_tasks_table():
 
     return table
 
+app = Flask(__name__)
 @app.route("/")
 def hello_world():
     return render_template('index.html', tasks_table = get_tasks_table(), data_table = get_data_table(), refresh_timer = config['refresh_timer'])
