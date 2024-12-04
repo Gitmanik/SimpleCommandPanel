@@ -2,60 +2,43 @@
     <head>
         <meta charset="UTF-8">
         <title>GitPanel</title>
-        <meta http-equiv="refresh" content="{{ refresh_timer }}">
+        <meta http-equiv="refresh" content={{refresh_timer}}>
         <style>
-            html,
-            body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                overflow: hidden; /* Prevent scrolling the entire page */
-            }
-
-            .container {
-                display: flex; /* Flexbox layout */
-                height: 100%; /* Full viewport height */
-                overflow: hidden; /* Prevents any overflow from the entire layout */
-            }
-
-            .left-column,
-            .right-column {
-                flex: 1; /* Equal width for both columns */
-                overflow: hidden; /* Prevents overflow within each column */
-            }
-
-            .right-column {
-                display: flex;
-                justify-content: center; /* Centers content horizontally */
-                align-items: center; /* Centers content vertically */
-            }
-
-            ul {
-                margin: 0;
-                padding: 10px;
-                list-style: none;
-                height: 100%;
-                white-space: nowrap; /* Prevents text from wrapping */
-                overflow: hidden; /* Hides overflowing text */
-            }
-
-            li {
-                font-size: larger;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-            }
-        </style>
+html,
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background-color: white;
+}
+table {
+    /* padding: 0; */
+    /* margin: 0; */
+    width:100%;
+    height:100%;
+}
+tr {
+    width: 100%;
+}
+td {
+    padding: 0;
+    font-size: larger;
+}
+h1 {
+    text-align: center;
+}
+            </style>
     </head>
     <body>
-        <div class="container">
-            <div class="left-column">
-                {{ tasks_table | safe }}
-            </div>
-            <div class="right-column">
-                {{ data_table | safe }}
-            </div>
-        </div>
+        <table>
+            <tr>
+                <td style="width:50%; vertical-align: top;">
+                    {{tasks_table | safe}}
+                </td>
+                <td  style="width:50%">
+                    {{data_table | safe}}
+                </td>
+            </tr>
+        </table>
     </body>
 </html>
