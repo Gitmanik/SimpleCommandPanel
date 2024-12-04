@@ -115,7 +115,7 @@ def get_data_table():
         docker_data = data[2]
 
         table += f"<h3 style='text-align: center; margin-bottom:0'>{host}</h3>"
-        table += f"<p style='width:100%;text-align:center; display: inline-block; margin:0; font-size: small; font-weight: bold'>{disk_data}{cpu_data}</p><p style='font-size: smaller; margin:0'>{docker_data}</p>"
+        table += f"<p style='width:100%;text-align:center; display: inline-block; margin:0; font-size: small; font-weight: bold'>{disk_data}{cpu_data}</p><p style='font-size: smaller; margin:0; margin-bottom:10px;'>{docker_data}</p>"
 
     table += '</div>'
 
