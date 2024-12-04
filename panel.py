@@ -42,7 +42,17 @@ def disconnect_clients():
             client[1].close()
 
 server_data = dict()
+tasks_data = []
 def update_data():
+    global tasks_data
+    print(f"Updating tasks data")
+
+    try:
+        tasks_data = api.get_tasks(project_id=todoist_project.id)
+    except Exception as e:
+        print(f"Error while retrieving Todoist tasks")
+        print(e)
+
     print(f"Updating server data")
     for idx, shell in enumerate(shells):
         host = shell[0]
@@ -104,9 +114,7 @@ def get_data_table():
 def get_tasks_table():
     table = '<ul>'
 
-    tasks = api.get_tasks(project_id=todoist_project.id)
-
-    for task in tasks:
+    for task in tasks_data:
         table += f'<li><span>{task.content}</span><span style="font-size: initial; float: right">{task.due.string}</span></li>'
 
     table += '</ul>'
