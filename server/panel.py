@@ -13,7 +13,7 @@ with open("config.json", "r") as config_file:
 
 api = TodoistAPI(config["todoist_api_key"])
 todoist_project = next((x for x in  api.get_projects() if x.name == config['todoist_project_name']), None)
-hti = Html2Image(size=(800, 600), custom_flags=['--no-sandbox', '--disable-gpu', '--headless=old', '--window-size=800,600'])
+hti = Html2Image(size=(800, 600), custom_flags=['--no-sandbox', '--disable-gpu', '--headless=old', '--window-size=800,600'], disable_logging=True)
 
 def connect_client(server):
     client = paramiko.SSHClient()
