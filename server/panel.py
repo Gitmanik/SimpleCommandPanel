@@ -7,8 +7,16 @@ import atexit
 from datetime import datetime
 from html2image import Html2Image
 import base64
+import logging
 
-with open("config.json", "r") as config_file:
+logger = logging.getLogger(__name__)
+hdlr = logging.StreamHandler()
+logger.addHandler(hdlr)
+logger.setLevel(logging.INFO)
+
+config_path = "config.json"
+
+with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
 api = TodoistAPI(config["todoist_api_key"])
@@ -21,17 +29,16 @@ def connect_client(server):
     host = f'{server[1]}@{server[0]}'
     try:
         if server[2] != None:
-            print(f"Connecting to {server[0]} as {server[1]} using password {'*' * len(server[2])}")
+            logger.info(f"Connecting to {server[0]} as {server[1]} using password {'*' * len(server[2])}")
             client.connect(server[0], username=server[1], password=server[2], timeout=0.5)
         else:
-            print(f"Connecting to {server[0]} as {server[1]} using private key {server[3]}")
+            logger.info(f"Connecting to {server[0]} as {server[1]} using private key {server[3]}")
             private_key = paramiko.RSAKey.from_private_key_file('./keys/' + server[3])
             client.connect(server[0], username=server[1], pkey=private_key, timeout=0.5)
         
         return [host, client]
     except Exception as e:
-        print(f"Error while connecting to {server[0]}")
-        print(e)
+        logger.error(f"Error while connecting to {server[0]}: {e}")
         return [host, None]
 
 shells = []
@@ -39,10 +46,10 @@ for server in config['servers']:
     shells.append(connect_client(server))
 
 def disconnect_clients():
-    print(f"Disconnecting clients")
+    logger.info(f"Disconnecting all clients")
     for client in shells:
         if client[1] is not None:
-            print(f"Disconnecting from {client[0]}")
+            logger.info(f"Disconnecting from {client[0]}")
             client[1].close()
 
 def client_is_alive(client):
@@ -56,16 +63,15 @@ server_data = dict()
 tasks_data = []
 def update_data():
     global tasks_data
-    print(f"Updating tasks data")
+    logger.info("Updating tasks data")
 
     try:
         tasks_data = api.get_tasks(project_id=todoist_project.id)
         tasks_data.sort(key= lambda x: datetime.strptime(x.due.date, "%Y-%m-%d"))       
     except Exception as e:
-        print(f"Error while retrieving Todoist tasks")
-        print(e)
+        logger.error(f"Error while retrieving Todoist tasks: {e}")
 
-    print(f"Updating server data")
+    logger.info("Updating server data")
     for idx, shell in enumerate(shells):
         host = shell[0]
 
@@ -97,9 +103,10 @@ def update_data():
             # print(f'DISK: stdout: {disk_data}, stderr: {stderr.read().decode()}')
             docker_data = docker_data[docker_data.index('\n')+1:].replace('\n', '<br>')
         else:
-            print(f"Can't get data from unconnected server: {host}, skipping")
+            logger.info(f"Can't get data from unconnected server: {host}, skipping")
 
         server_data[host] = [cpu_data, disk_data, docker_data]
+    logger.error("Finished updating")
 
 data_update_scheduler = BackgroundScheduler()
 data_update_scheduler.add_job(func=update_data, trigger="interval", seconds=config['data_update_timer'])
