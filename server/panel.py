@@ -47,11 +47,9 @@ def disconnect_clients():
 
 def client_is_alive(client):
     try:
-        transport = client.get_transport()
-        transport.send_ignore()
+        client.exec_command('ls')
         return True
     except Exception as e:
-        # print(f"Client is not active")
         return False
 
 server_data = dict()
