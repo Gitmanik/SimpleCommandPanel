@@ -48,6 +48,7 @@ def client_is_alive(client):
         transport.send_ignore()
         return True
     except Exception as e:
+        # print(f"Client is not active")
         return False
 
 server_data = dict()
@@ -80,7 +81,7 @@ def update_data():
         disk_data = '-'
         docker_data = "<i style='text-align: center; width:100%; display:inline-block'>Can't connect to server!</i>"
 
-        if client is not None:
+        if client is not None and client_is_alive(client):
             stdin, stdout, stderr = client.exec_command(cpu)
             cpu_data = stdout.read().decode()
             # print(f'CPU: stdout: {cpu_data}, stderr: {stderr.read().decode()}')
