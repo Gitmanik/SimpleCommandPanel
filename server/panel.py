@@ -5,12 +5,15 @@ import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 from datetime import datetime
+from html2image import Html2Image
+import base64
 
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
 
 api = TodoistAPI(config["todoist_api_key"])
 todoist_project = next((x for x in  api.get_projects() if x.name == config['todoist_project_name']), None)
+hti = Html2Image(size=(800, 600), custom_flags=['--no-sandbox', '--disable-gpu', '--headless=old', '--window-size=800,600'])
 
 def connect_client(server):
     client = paramiko.SSHClient()
@@ -136,3 +139,10 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world():
     return render_template('index.html', tasks_table = get_tasks_table(), data_table = get_data_table(), refresh_timer = config['refresh_timer'])
+
+@app.route("/render")
+def render_panel():
+    image_path = 'panel.png'
+    hti.screenshot(url='http://127.0.0.1:5000/', save_as=image_path)
+    with open(image_path, 'rb') as image_data:
+        return render_template('image.html', refresh_timer = config['refresh_timer'], image = base64.b64encode(image_data.read()).decode('ascii'))
