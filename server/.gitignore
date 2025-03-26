@@ -165,3 +165,4 @@ config.json
 .vscode
 keys/
 panel.png
+.bin
