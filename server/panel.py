@@ -4,9 +4,7 @@ import paramiko
 import json
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
-from datetime import datetime
-from html2image import Html2Image
-import base64
+from datetime import datetime, time
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,8 +18,7 @@ with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
 api = TodoistAPI(config["todoist_api_key"])
-todoist_project = next((x for x in  api.get_projects() if x.name == config['todoist_project_name']), None)
-hti = Html2Image(size=(800, 600), custom_flags=['--no-sandbox'], browser_executable=".bin/chrome-headless-shell/chrome-headless-shell", disable_logging=True)
+todoist_project = next((x for x in next(api.get_projects()) if x.name == config['todoist_project_name']), None)
 
 def connect_client(server):
     client = paramiko.SSHClient()
@@ -66,8 +63,8 @@ def update_data():
     logger.info("Updating tasks data")
 
     try:
-        tasks_data = api.get_tasks(project_id=todoist_project.id)
-        tasks_data.sort(key= lambda x: datetime.strptime(x.due.date, "%Y-%m-%d"))       
+        tasks_data = next(api.get_tasks(project_id=todoist_project.id))
+        tasks_data.sort(key= lambda x: datetime.combine(x.due.date, time()))
     except Exception as e:
         logger.error(f"Error while retrieving Todoist tasks: {e}")
 
@@ -123,8 +120,9 @@ def get_data_table():
         disk_data = data[1]
         docker_data = data[2]
 
-        table += f"<h3 style='text-align: center; margin-bottom:0'>{host}</h3>"
-        table += f"<p style='width:100%;text-align:center; display: inline-block; margin:0; font-size: small; font-weight: bold'>{disk_data}{cpu_data}</p><p style='font-size: smaller; margin:0; margin-bottom:10px;'>{docker_data}</p>"
+        table += f"<h2 class='host'>{host}</h2>"
+        table += f"<p class='cpu_data'>{disk_data}{cpu_data}</p>"
+        table += f"<p class='docker_data'>{docker_data}</p>"
 
     table += '</div>'
 
@@ -144,10 +142,3 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world():
     return render_template('index.html', tasks_table = get_tasks_table(), data_table = get_data_table(), refresh_timer = config['refresh_timer'])
-
-@app.route("/render")
-def render_panel():
-    image_path = 'panel.png'
-    hti.screenshot(url='http://127.0.0.1:5000/', save_as=image_path)
-    with open(image_path, 'rb') as image_data:
-        return render_template('image.html', refresh_timer = config['refresh_timer'], image = base64.b64encode(image_data.read()).decode('ascii'))

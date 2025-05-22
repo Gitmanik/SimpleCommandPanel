@@ -1,0 +1,12 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "apscheduler>=3.11.0",
+    "flask>=3.1.1",
+    "paramiko>=3.5.1",
+    "todoist-api-python>=3.1.0",
+]
